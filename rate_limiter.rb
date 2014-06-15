@@ -1,41 +1,24 @@
-require 'pry'
-
 class RateLimiter
   MAX_REQUESTS = 20
 
-  class RateLimitExceeded < StandardError
-  end
+  class RateLimitExceeded < StandardError; end
 
-  def self.counts
-    @counts ||= Hash.new(0)
-  end
+  attr_reader :username
+  attr_accessor :count
 
-  def self.maximum
-    MAX_REQUESTS
-  end
-
-  def self.reset!
-    @counts = nil
-  end
-
-  attr_reader :user_name
-
-  def initialize(user_name)
-    @user_name = user_name
+  def initialize(username)
+    @username = username
+    @count = 0
   end
 
   def check!
     increment
-    if self.count >= self.class.maximum
-      raise RateLimitExceeded.new("#{user_name} has exceeded the maximum number of requests")
+    if count >= MAX_REQUESTS
+      raise RateLimitExceeded.new("#{username} has exceeded the maximum number of requests")
     end
   end
 
   def increment
-    self.class.counts[user_name] += 1
-  end
-
-  def count
-    self.class.counts[user_name]
+    self.count += 1
   end
 end
